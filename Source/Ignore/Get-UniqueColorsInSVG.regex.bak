@@ -1,0 +1,74 @@
+function Get-UniqueColorsInSVG {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,Position=0, ValueFromPipeline)]
+        $SVGFile
+    )
+
+    begin {
+        $xmlDoc = [System.Xml.XmlDocument]::new()
+        $nsmgr = [System.Xml.XmlNamespaceManager]::new($xmlDoc.NameTable);
+        $nsmgr.AddNamespace("xsl", "http://www.w3.org/1999/XSL/Transform");
+        $nsmgr.AddNamespace("svg", "http://www.w3.org/2000/svg");
+    }
+
+    process {
+
+        $xmlDoc.Load((Convert-Path $SVGFile))
+        $uniqueColors = [System.Collections.Generic.HashSet[String]]::new(
+            [System.StringComparer]::InvariantCultureIgnoreCase)
+
+        [System.Xml.XmlNodeList]$lgrad = $xmlDoc.SelectNodes("//svg:linearGradient", $nsmgr)
+        [System.Xml.XmlNodeList]$rgrad = $xmlDoc.SelectNodes("//svg:radialGradient", $nsmgr)
+        if(($lgrad.Count -gt 0) -or ($rgrad.Count -gt 0)) {
+            $PSCmdlet.ThrowTerminatingError([System.Management.Automation.ErrorRecord]::new(
+                [System.Exception]::new("SVG has gradients. This isn't supported."),
+                "GrandientNotSupported",
+                [System.Management.Automation.ErrorCategory]::NotImplemented,
+                $xmlDoc))
+        }
+
+        $HTMLHexRegex = "#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})"
+
+        [System.Xml.XmlNodeList]$stylenode = $xmlDoc.SelectNodes("//svg:style", $nsmgr)
+        foreach($node in $stylenode){
+            [string]$fillSearch = $node.InnerText
+            Write-Host "`$fillSearch:" $fillSearch -ForegroundColor Green
+            [regex]::Matches($fillSearch, "fill:\s*" + $HTMLHexRegex) | ForEach-Object {
+                $uniqueColors.Add($_.Groups[1].Value) | Out-Null
+            }
+
+            [regex]::Matches($fillSearch, "color:\s*" + $HTMLHexRegex) | ForEach-Object {
+                $uniqueColors.Add($_.Groups[1].Value) | Out-Null
+            }
+        }
+
+        $pathStylePattern = "fill:"+$HTMLHexRegex
+        [System.Xml.XmlNodeList]$pathStyleAttributes = $xmlDoc.SelectNodes("//svg:path/@style", $nsmgr)
+        foreach($node in $pathStyleAttributes){
+
+            $PathStyleAttribute = $node.Value
+            [regex]::Matches($PathStyleAttribute, $pathStylePattern) | ForEach-Object {
+                $uniqueColors.Add($_.Groups[1].Value) | Out-Null
+            }
+        }
+
+        'path', 'rect', 'circle', 'elipse', 'polygon', 'polyline', 'text', 'textPath', 'tref', 'tspan', 'g' | ForEach-Object {
+            foreach ($node in $xmlDoc.SelectNodes("//svg:$_/@fill", $nsmgr)) {
+                $Val = $node.Value
+                [regex]::Matches($Val, $HTMLHexRegex) | ForEach-Object {
+                    $uniqueColors.Add($_.Groups[1].Value) | Out-Null
+                }
+            }
+        }
+
+        $uniqueColorsFormatted = foreach ($color in $uniqueColors) {
+            if ($color.Length -eq 3) {
+                $color = $color + $color
+            }
+            "#$color"
+        }
+
+        $uniqueColorsFormatted
+    }
+}
