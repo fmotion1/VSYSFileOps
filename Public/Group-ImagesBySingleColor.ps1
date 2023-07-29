@@ -33,12 +33,17 @@ function Group-ImagesBySingleColor {
 
         $List | ForEach-Object {
             $File  = $_
-            $MList = $MatchList
             $Color = $HexColor
             $Result = & magick -background None $File -scale "1x1^!" -alpha off -depth 8 -define ftxt:format=\H\n ftxt:
+
+            Write-Host "`$File:" $File -ForegroundColor Green
+            Write-Host "`$Color:" $Color -ForegroundColor Green
+            Write-Host "`$Result:" $Result -ForegroundColor Green
+
             if($Result -eq $Color){
-                $MList.Add($File)
+                $MatchList.Add($File)
             }
+
         }
 
         if($MatchList.Count -gt 1){
