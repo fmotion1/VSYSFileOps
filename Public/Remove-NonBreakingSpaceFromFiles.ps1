@@ -6,6 +6,7 @@ function Remove-NonBreakingSpaceFromFiles {
     )
 
     process {
+
         foreach ($File in $Files) {
             if($File -match '\u00A0'){
                 Write-Verbose "NBSP Detected in $File"

@@ -47,7 +47,7 @@ function Convert-PATToImages {
 
             $RenameStr = ($RenameToFilename) ? 'true' : 'false'
 
-            $Script = "C:\BIN\Node\Pat2Image\save.js"
+            $Script = "$env:bin\Node\Pat2Image\save.js"
             [void] (& node.exe `"$Script`" `"$InputFile`" `"$ImagesDir`" `"$RenameStr`" 2>&1 | Tee-Object -Variable allOutput)
 
             $STDERR = $allOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }

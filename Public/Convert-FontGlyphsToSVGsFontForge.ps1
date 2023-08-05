@@ -10,7 +10,6 @@ function Convert-FontGlyphsToSVGsFontForge {
     )
 
     begin {
-        #D:\Dev\Python\FontTools\Scripts\Activate.ps1
         $List = @()
     }
 

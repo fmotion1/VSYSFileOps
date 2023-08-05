@@ -10,7 +10,7 @@ function Convert-FontToSVG {
     )
 
     begin {
-        D:\Dev\Python\FontTools\Scripts\Activate.ps1
+        & "$env:PYVENV\FontTools\Scripts\Activate.ps1"
         $List = @()
     }
 
@@ -36,7 +36,7 @@ function Convert-FontToSVG {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            $Script = "D:\Dev\Python\FontSripts\ConvertTTFToSVG.py"
+            $Script = "D:\Dev\Python\Font Scripts\ConvertTTFToSVG.py"
 
             & ffpython $Script $CurrentFile
             # & fontforge -script $Script $CurrentFile

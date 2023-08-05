@@ -10,7 +10,7 @@ function Convert-FontTTFToOTF {
     )
 
     begin {
-        D:\Dev\Python\FontTools\Scripts\Activate.ps1
+        & "$env:PYVENV\FontTools\Scripts\Activate.ps1"
         $List = @()
     }
 
@@ -31,7 +31,7 @@ function Convert-FontTTFToOTF {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            $Script = "D:\Dev\Python\FontSripts\ConvertTTFToOTF.py"
+            $Script = "D:\Dev\Python\Font Scripts\ConvertTTFToOTF.py"
             #[void] (& ffpython `"$Script`" `"$CurrentFile`" 2>&1 | Tee-Object -Variable allOutput)
             & fontforge -script $Script $CurrentFile
 

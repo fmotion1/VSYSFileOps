@@ -15,7 +15,7 @@ function Rename-FontToActualNameDirectory {
 
 
     begin {
-        D:\Dev\Python\FontTools\Scripts\Activate.ps1
+        & "$env:PYVENV\FontTools\Scripts\Activate.ps1"
         $List = @()
     }
 

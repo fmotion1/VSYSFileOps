@@ -29,14 +29,8 @@ function Convert-WavpackToWav {
             $CurrentFile = $_
 
             $Script = "-W", $CurrentFile
-            [void] (& WVUNPACK $Script 2>&1 | Tee-Object -Variable ALLOUTPUT)
-
-            $STDERR = $ALLOUTPUT | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            $Filename = Split-Path $CurrentFile -Leaf
-            if($LASTEXITCODE -ne 0){
-                Write-Error "Error processing $Filename. Exit code is not 0."
-                return
-            }
+            $App = "C:\BIN\wavpack-5.5.0-x64\wvunpack.exe"
+            & $App $Script
 
         } -ThrottleLimit $MaxThreads
     }

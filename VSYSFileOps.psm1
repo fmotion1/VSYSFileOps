@@ -79,7 +79,7 @@ if ($FoundErrors.Count -gt 0) {
     Write-Warning "Importing module $ModuleName failed. Fix errors before continuing."
 }
 
-Export-ModuleMember -Function   Convert-ImageToMetadataExiv2, Convert-OBJ2VOX, Convert-PATToImages, Convert-PNGtoICONew,
+Export-ModuleMember -Function   Convert-ImageToMetadataExiv2, Convert-OBJ2VOX, Convert-PATToImages, Convert-PNGtoICO,
                                 Convert-RasterToRaster, Convert-RecolorPNG, Convert-SVGtoICO, Convert-SVGToPNGBySize,
                                 Convert-VectorToRaster, Convert-VectorToSVG, Convert-WavpackToWav, Copy-DirectoryStructureToNewFolder,
                                 Copy-PathToClipboard, Enable-PrivilegeForProcess, Get-DefaultBrowser, Get-FilePathComponent,
@@ -95,6 +95,7 @@ Export-ModuleMember -Function   Convert-ImageToMetadataExiv2, Convert-OBJ2VOX, C
                                 Convert-FontGlyphsToSVGsFonts2Svg, Convert-FontOTFToTTF, Convert-FontToSVG,
                                 Convert-FontToTTXXML, Convert-FontTTFToOTF, Convert-FontWOFFCompress,
                                 Convert-FontWOFFCompressGoogle, Convert-FontWOFFDecompress, Convert-ImageToMetadataAll,
-                                Convert-ImageToMetadataEXIFTool, Remove-NonBreakingSpaceFromFiles, Remove-NonBreakingSpaceFromFilesInList
+                                Convert-ImageToMetadataEXIFTool, Remove-NonBreakingSpaceFromFiles, Save-FontsToFolderByWord,
+                                Remove-NonBreakingSpaceFromFilesInList, Remove-NBSPFromFile,Save-FontsToFolder
 
 

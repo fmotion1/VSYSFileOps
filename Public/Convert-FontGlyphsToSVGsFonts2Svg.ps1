@@ -10,7 +10,7 @@ function Convert-FontGlyphsToSVGsFonts2Svg {
     )
 
     begin {
-        & "D:\Dev\Python\FontTools\Scripts\Activate.ps1"
+        & "$env:PYVENV\FontTools\Scripts\Activate.ps1"
         $List = @()
     }
 

@@ -10,7 +10,7 @@ function Rename-FontToActualName {
     )
 
     begin {
-        D:\Dev\Python\FontTools\Scripts\Activate.ps1
+        & "$env:PYVENV\FontTools\Scripts\Activate.ps1"
         $List = @()
     }
 
@@ -30,7 +30,7 @@ function Rename-FontToActualName {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            $Script = "D:\Dev\Python\FontSripts\GetFontName.py"
+            $Script = "D:\Dev\Python\Font Scripts\ReturnRealFontNameAsFile.py"
 
             $RealFontName = & python $Script $CurrentFile
 

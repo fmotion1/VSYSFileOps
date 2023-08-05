@@ -1,5 +1,4 @@
 using namespace Sytem.Collections.Generic;
-
 function Remove-NonBreakingSpaceFromFilesInList {
     [CmdletBinding()]
     param (
@@ -46,3 +45,5 @@ function Remove-NonBreakingSpaceFromFilesInList {
         return $OutputPath
     }
 }
+
+

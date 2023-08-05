@@ -33,7 +33,7 @@ function Convert-VectorToSVG {
             $CurrentAIFile = $CurrentAIFile.Replace('`]', ']')
             $OutputSVGFile = [IO.Path]::ChangeExtension($CurrentAIFile, ".svg")
 
-            $App   = "C:\BIN\Inkscape-1.1\bin\inkscape.com"
+            $App   = "$env:bin\inkscape-1.3\bin\inkscape.com"
             $Args1 = $CurrentAIFile, '--export-area-drawing'
             $Args2 = '--export-plain-svg', '--export-filename', $OutputSVGFile
             [void] (& $App $Args1 $Args2 2>&1 | Tee-Object -Variable ALLOUTPUT)

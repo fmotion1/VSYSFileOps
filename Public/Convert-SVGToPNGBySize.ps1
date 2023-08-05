@@ -75,7 +75,7 @@ function Convert-SVGToPNGBySize {
                 & rsvg-convert -w $TargetSize -h $TargetSize -a -f png $TheSVG -o $TempFinalName | Out-Null
 
 
-                # & resvg -w $TargetSize -h $TargetSize $TheSVG $TempFinalName
+
 
                 $DestFile = $DestFinalName
                 $IDX = 2
