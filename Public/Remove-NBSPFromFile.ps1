@@ -1,18 +1,16 @@
 function Remove-NBSPFromFile {
-    [CmdletBinding(DefaultParameterSetName = 'FromPath')]
+    [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true, ParameterSetName = 'FromPath', Position = 0, ValueFromPipeline = $true)]
-        [string[]]$Path,
-
-        [Parameter(Mandatory = $true, ParameterSetName = 'FromLiteralPath', ValueFromPipelineByPropertyName = $true)]
-        [Alias('PSPath')]
-        [string[]]$LiteralPath
+        [Parameter(Mandatory,ValueFromPipeline)]
+        [String]
+        $Files
     )
 
     process {
-        foreach($File in Get-Item @PSBoundParameters) {
+        foreach($File in $Files) {
             if($File -match '\u00A0') {
-                $File | Rename-Item -NewName { $_.Name -replace '\u00A0', ' ' } -Force
+                Write-Output "NBSP was found and removed in $File."
+                $File | Rename-Item -NewName { $_.Name -replace '\u00A0', '' } -Force
             }
         }
     }

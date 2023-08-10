@@ -90,12 +90,13 @@ Export-ModuleMember -Function   Convert-ImageToMetadataExiv2, Convert-OBJ2VOX, C
                                 Group-SplitDirectoryContentsToSubfolders, Merge-FlattenDirectory, Optimize-SVGWithSVGCleaner,
                                 Optimize-SVGWithSVGO, Register-DLLorOCX, Rename-FontToActualName, Rename-FontToActualNameDirectory,
                                 Rename-RandomizeFilenames, Request-AdminRights, Request-ExplorerRefresh, Save-RandomDataToFile,
-                                Save-RandomDataToFiles, Search-GoogleIt, Set-FolderIcon, Set-SVGOpacityToOpaque, Test-IsFileLocked,
+                                Save-RandomDataToFiles, Search-GoogleIt, Set-FolderIcon, Set-SVGOpacityToOpaque, Test-FileIsLocked,
                                 Convert-FontEmbedLevelToUnrestricted, Convert-FontGlyphsToSVGsFontForge,
                                 Convert-FontGlyphsToSVGsFonts2Svg, Convert-FontOTFToTTF, Convert-FontToSVG,
                                 Convert-FontToTTXXML, Convert-FontTTFToOTF, Convert-FontWOFFCompress,
                                 Convert-FontWOFFCompressGoogle, Convert-FontWOFFDecompress, Convert-ImageToMetadataAll,
                                 Convert-ImageToMetadataEXIFTool, Remove-NonBreakingSpaceFromFiles, Save-FontsToFolderByWord,
-                                Remove-NonBreakingSpaceFromFilesInList, Remove-NBSPFromFile,Save-FontsToFolder
+                                Remove-NonBreakingSpaceFromFilesInList, Remove-NBSPFromFile,Save-FontsToFolder,Rename-SeparatePascalCase,
+                                Publish-ImageToImgur,Publish-ImageToGoogleReverseImageSearch,Get-ImageDominantColor
 
 
