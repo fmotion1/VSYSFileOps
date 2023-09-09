@@ -31,9 +31,9 @@ function Convert-FontTTFToOTF {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            $Script = "D:\Dev\Python\Font Scripts\ConvertTTFToOTF.py"
-            #[void] (& ffpython `"$Script`" `"$CurrentFile`" 2>&1 | Tee-Object -Variable allOutput)
-            & fontforge -script $Script $CurrentFile
+            $Script = "$env:FONTSCRIPTS\fontforge_convert_ttf_to_otf.py"
+            $APP = "$env:FONTFORGEBIN\ffpython.exe"
+            & $APP $Script $CurrentFile
 
         } -ThrottleLimit $MaxThreads
     }

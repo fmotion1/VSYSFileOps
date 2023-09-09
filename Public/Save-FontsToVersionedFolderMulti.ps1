@@ -1,22 +1,25 @@
-function Convert-FontEmbedLevelToUnrestricted {
+function Save-FontsToVersionedFolderMulti {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
-        $Files,
+        [Alias("f")]
+        [Parameter(Mandatory,ValueFromPipeline)]
+        $Folders,
 
         [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
         [Int32]
-        $MaxThreads = 16
+        $MaxThreads = 16,
+
+        [Parameter(Mandatory=$false)]
+        [Switch]
+        $WFR
     )
 
     begin {
-
-        & "$env:PYVENV\FontTools\Scripts\Activate.ps1"
         $List = @()
     }
 
     process {
-        foreach ($P in $Files) {
+        foreach ($P in $Folders) {
             if     ($P -is [String]) { $List += $P }
             elseif ($P.Path)         { $List += $P.Path }
             elseif ($P.FullName)     { $List += $P.FullName }
@@ -26,14 +29,17 @@ function Convert-FontEmbedLevelToUnrestricted {
     }
 
     end {
-
         $List | ForEach-Object -Parallel {
 
-            $CurrentFile = $_
-            $CurrentFile = $CurrentFile.Replace('`[', '[')
-            $CurrentFile = $CurrentFile.Replace('`]', ']')
+            $InputFolder = $_
+            $Files = Get-ChildItem $InputFolder | % {$_.FullName}
 
-            & ftcli os2 -el 0 $CurrentFile
+            if(!$Using:WFR){
+                Save-FontsToVersionedFolder -Files $Files -MaxThreads 8
+            }else{
+                Save-FontsToVersionedFolder -Files $Files -MaxThreads 8 -WFR
+            }
+
 
         } -ThrottleLimit $MaxThreads
     }

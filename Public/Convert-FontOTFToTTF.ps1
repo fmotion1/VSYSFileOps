@@ -10,6 +10,7 @@ function Convert-FontOTFToTTF {
     )
 
     begin {
+
         & "$env:PYVENV\FontTools\Scripts\Activate.ps1"
         $List = @()
     }
@@ -31,9 +32,7 @@ function Convert-FontOTFToTTF {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            $Script = "D:\Dev\Python\Font Scripts\otf2ttf.py", $CurrentFile
-
-            & python $Script
+            & otf2ttf $CurrentFile
 
         } -ThrottleLimit $MaxThreads
     }

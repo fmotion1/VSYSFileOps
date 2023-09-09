@@ -31,15 +31,7 @@ function Convert-FontWOFFDecompress {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            #& ftcli webfonts decompress --no-overwrite $CurrentFile
-
             & ftcli converter wf2ft --no-overwrite $CurrentFile
-
-            # $STDERR = $allOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            # $Filename = Split-Path $CurrentFile -Leaf
-            # if($LASTEXITCODE -ne 0){
-            #     Write-Error "Error processing $Filename. Exit code is not 0."
-            # }
 
         } -ThrottleLimit $MaxThreads
     }

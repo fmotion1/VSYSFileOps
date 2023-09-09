@@ -36,15 +36,8 @@ function Convert-FontWOFFCompressGoogle {
 
             $CopiedFile = Copy-Item -LiteralPath $CurrentFile -Destination $TempDirName -PassThru
 
-            #[void] (& woff2_compress.exe `"$($CopiedFile.FullName)`" 2>&1 | Tee-Object -Variable allOutput)
             & woff2_compress.exe $($CopiedFile.FullName)
 
-            # $STDERR = $allOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            # $Filename = Split-Path $CurrentFile -Leaf
-            # if($LASTEXITCODE -ne 0){
-            #     Write-Error "Error processing $Filename. Exit code is not 0."
-            #     return
-            # }
 
             $Base = Get-FilePathComponent -Path $CopiedFile.FullName -Component FullPathNoExtension
             $CreatedWOFF = $Base + ".woff2"

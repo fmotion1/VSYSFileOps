@@ -68,10 +68,6 @@ Function Copy-DirectoryStructureToNewFolder{
         $Force
     )
 
-    begin {
-        Add-Type -AssemblyName PresentationCore, PresentationFramework
-    }
-
     process {
 
         $DestParent = (Get-Item -LiteralPath $SourcePath).Parent

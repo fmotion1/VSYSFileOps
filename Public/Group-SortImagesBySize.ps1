@@ -25,8 +25,6 @@ function Group-SortImagesBySize {
 
     end {
 
-        Add-Type -AssemblyName System.Drawing
-
         $List | ForEach-Object -Parallel {
 
             $ImagePath    = $_

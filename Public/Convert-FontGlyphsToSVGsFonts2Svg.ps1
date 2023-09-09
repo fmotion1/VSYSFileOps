@@ -10,6 +10,7 @@ function Convert-FontGlyphsToSVGsFonts2Svg {
     )
 
     begin {
+
         & "$env:PYVENV\FontTools\Scripts\Activate.ps1"
         $List = @()
     }
@@ -36,9 +37,10 @@ function Convert-FontGlyphsToSVGsFonts2Svg {
             }
 
             #$Script = $CurrentFile, '-o', $DestPath
-
             # & fonts2svg `"$CurrentFile`" -o `"$DestPath`"
-            & fonts2svg $CurrentFile -o $DestPath
+
+            $APP = "C:\Python\miniconda3\envs\FontTools\Scripts\fonts2svg.exe"
+            & $APP $CurrentFile -o $DestPath
 
         } -ThrottleLimit $MaxThreads
     }

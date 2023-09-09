@@ -30,8 +30,6 @@ function Search-GoogleIt {
 
     process {
 
-        Add-Type -AssemblyName System.Web
-
         $ImageSearchSizeStr = ($ImageSearchSize -eq 'Any') ? '' : "$($ImageSearchSize.ToLower())"
         $ImageFileTypeStr   = ($ImageFileType -eq 'Any') ? '' : "filetype:$($ImageFileType.ToLower())"
         $SiteOrDomainStr    = ($SiteOrDomain) ? "site:$SiteOrDomain" : ''

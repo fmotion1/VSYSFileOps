@@ -92,7 +92,9 @@ function Enable-PrivilegeForProcess {
     )
 
     process {
-        Add-Type $def
+        if (-not ('AdjPriv' -as [Type])){
+            Add-Type $def
+        }
         [AdjPriv]::EnablePrivilege($ProcessId, $Privilege, $Disable)
     }
 }

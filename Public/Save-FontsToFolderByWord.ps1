@@ -17,7 +17,7 @@ function Save-FontsToFolderByWord {
     begin {
 
         & "D:\Dev\Python\00 VENV\FontTools\Scripts\Activate.ps1"
-        $VersionScript = "D:\Dev\Python\Font Scripts\GetFontVersion.py"
+        $VersionScript = "$env:FONTSCRIPTS\get_font_version.py"
 
         $List = @()
     }
@@ -41,8 +41,6 @@ function Save-FontsToFolderByWord {
 
             $FontFileName      = $FontFileC.FileFullName
             $FontDirectory     = $FontFileC.ContainingFolder
-            $FontExtension     = $FontFileC.FileExtension
-            $FontFullPathNoExt = $FontFileC.FullPathNoExtension
 
             $FontFileVersion = & python $Using:VersionScript $FontFile
 

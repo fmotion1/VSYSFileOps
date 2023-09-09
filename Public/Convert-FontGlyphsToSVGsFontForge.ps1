@@ -33,7 +33,8 @@ function Convert-FontGlyphsToSVGsFontForge {
                 New-Item -Path $DestPath -ItemType Directory -Force | Out-Null
             }
 
-            fontforge -lang=ff -c 'Open($1); SelectAll(); UnlinkReference(); Export("FontForge Export/%n-%e.svg");' $CurrentFile
+            $APP = "$env:FONTFORGEBIN\fontforge.exe"
+            & $APP -lang=ff -c 'Open($1); SelectAll(); UnlinkReference(); Export("FontForge Export/%n-%e.svg");' $CurrentFile
 
             $CurrentFile = $_
             $FullNoExt = [IO.Path]::GetFileNameWithoutExtension($CurrentFile)

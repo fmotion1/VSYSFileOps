@@ -30,16 +30,8 @@ function Rename-FontToActualName {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            $Script = "D:\Dev\Python\Font Scripts\ReturnRealFontNameAsFile.py"
-
+            $Script = "$env:FONTSCRIPTS\get_real_font_name_with_extension.py"
             $RealFontName = & python $Script $CurrentFile
-
-            # $STDERR = $allOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            # $Filename = Split-Path $CurrentFile -Leaf
-            # if($LASTEXITCODE -ne 0){
-            #     Write-Error "Error processing $Filename. Exit code is not 0. Real font name couldn't be determined."
-            #     return
-            # }
 
             $CurFileName = [System.IO.Path]::GetFileName($CurrentFile)
             if($RealFontName -eq $CurFileName){ return }

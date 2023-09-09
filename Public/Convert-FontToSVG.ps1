@@ -36,15 +36,11 @@ function Convert-FontToSVG {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            $Script = "D:\Dev\Python\Font Scripts\ConvertTTFToSVG.py"
+            $Script = "$env:FONTSCRIPTS\fontforge_convert_ttf_to_svg.py"
 
-            & ffpython $Script $CurrentFile
-            # & fontforge -script $Script $CurrentFile
+            $APP = "$env:FONTFORGEBIN\ffpython.exe"
+            & $APP $Script $CurrentFile
 
-            # $STDERR = $allOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            # if($LASTEXITCODE -ne 0){
-            #     Write-Error "Error processing $CurrentFile. Exit code is not 0."
-            # }
         } -ThrottleLimit $MaxThreads
     }
 }

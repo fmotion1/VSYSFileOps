@@ -1,24 +1,19 @@
-$Class = @'
-public class ImageColorDefinition
-{
-    public string RGBValue { get;set; }
-    public string HEXValue { get;set; }
-    public string PixelCount { get;set; }
-    public string Image { get;set; }
-    public int RChannel { get;set; }
-    public int GChannel { get;set; }
-    public int BChannel { get;set; }
+class ImageColorDefinition {
+    [string] $RGBValue
+    [string] $HEXValue
+    [string] $PixelCount
+    [string] $Image
+    [int] $RChannel
+    [int] $GChannel
+    [int] $BChannel
 }
-'@
 
-Add-Type -TypeDefinition $Class
-
-function Get-ImageDominantColor {
+function Get-ImageDominantColors {
     <#
     .SYNOPSIS
         Leverages ImageMagick to get the dominant color of an image.
     #>
-    [OutputType("ImageColorDefinition")]
+    [OutputType([ImageColorDefinition])]
 
     [CmdletBinding()]
     param (

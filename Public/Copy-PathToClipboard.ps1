@@ -69,8 +69,6 @@ function Copy-PathToClipboard {
     )
     process {
 
-        Add-Type -AssemblyName System.Windows.Forms
-
         $FilenameList   = [System.Collections.ArrayList]@()
         $FoldernameList = [System.Collections.ArrayList]@()
         $CombinedList   = [System.Collections.ArrayList]@()
