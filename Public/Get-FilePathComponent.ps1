@@ -18,13 +18,13 @@ function Get-FilePathComponent {
     process {
         foreach ($P in $Path) {
             $Result = switch ($Component) {
-                'Folder'               { Split-Path $P -Parent; }
-                'FileBase'             { Split-Path $P -LeafBase; }
-                'File'                 { Split-Path $P -Leaf; }
-                'FileExtension'        { Split-Path $P -Extension; }
-                'FullPathNoExtension'  { [IO.Path]::Combine((Split-Path $P -Parent),(Split-Path $P -LeafBase)); }
-                'FullPath'             { $P; }
-                'ParentFolder'         { Split-Path (Split-Path $P -Parent) -Parent; }
+                'Folder'               { [System.IO.Path]::GetDirectoryName($P) }
+                'FileBase'             { [System.IO.Path]::GetFileNameWithoutExtension($P) }
+                'File'                 { [System.IO.Path]::GetFileName($P) }
+                'FileExtension'        { [System.IO.Path]::GetExtension($P) }
+                'FullPathNoExtension'  { [IO.Path]::Combine([System.IO.Path]::GetDirectoryName($P), [System.IO.Path]::GetFileNameWithoutExtension($P)) }
+                'FullPath'             { $P }
+                'ParentFolder'         { Split-Path (Split-Path $P -Parent) -Parent }
             }
             $Result
         }

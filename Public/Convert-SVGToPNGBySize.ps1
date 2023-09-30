@@ -1,21 +1,16 @@
-using namespace System.Collections.Generic
 function Convert-SVGToPNGBySize {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
-        $FileList,
+        [Parameter(Mandatory,ValueFromPipeline)]
+        $Files,
 
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]
-        [ValidateScript( {
-            foreach ($item in $_) {
-                if (!($item -match "^\d{1,4}$")) {
-                    return $false
-                }
-            }
-            return $true
-        }, ErrorMessage = "Invalid size value passed. Each value must be less than five in length and contain only digits.")]
         [String[]]
         $Sizes,
+
+        [Parameter(Mandatory=$false)]
+        [Switch]
+        $OverwriteFiles,
 
         [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
         [Int32]
@@ -23,71 +18,63 @@ function Convert-SVGToPNGBySize {
     )
 
     begin {
-        $Files = [List[String]]::new()
+        $List = [System.Collections.Generic.List[String]]::new()
+        $Sizes | ForEach-Object {
+            if($_ -notmatch "^\d{1,4}$"){
+                Write-Error "Invalid value passed to Sizes parameter."
+                return
+            }
+        }
     }
 
     process {
-        foreach ($P in $FileList) {
-            if	   ($P -is [String]) { $Files.Add($P) }
-            elseif ($P.Path)		 { $Files.Add($P.Path) }
-            elseif ($P.FullName)	 { $Files.Add($P.FullName) }
-            elseif ($P.PSPath)	     { $Files.Add($P.PSPath) }
+        foreach ($P in $Files) {
+            if	   ($P -is [String]) { $List.Add($P) }
+            elseif ($P.Path)		 { $List.Add($P.Path) }
+            elseif ($P.FullName)	 { $List.Add($P.FullName) }
+            elseif ($P.PSPath)	     { $List.Add($P.PSPath) }
             else					 { Write-Warning "$P is an unsupported type." }
         }
     }
 
     end {
 
-        $Files | ForEach-Object -Parallel {
+        $List | ForEach-Object -Parallel {
 
-            $TempDirectory = New-TempDirectory -Length 14
-            $TempDirName = $TempDirectory.FullName
+            $SVGFileInput = $_
+            $SVGFileBase  = [IO.Path]::GetFileNameWithoutExtension($_)
+            $TargetSizes  = $Using:Sizes
+            $doOverwrite  = $Using:OverwriteFiles
 
-            $TheSVG = $_
-            $TheSVGBaseName = [IO.Path]::GetFileNameWithoutExtension($_)
-            # [String]$Output = Select-Xml '//*[local-name()="svg"]/@viewBox' -Path $TheSVG | % Node | % '#text'
-
-            # $SourceWidth  = [Int32]($Output.Split(" "))[2]
-            # $SourceHeight = [Int32]($Output.Split(" "))[3]
-
-            $TargetSizes = $Using:Sizes
+            $CMD = Get-Command "$env:bin\rsvg-convert.exe"
 
             $TargetSizes | ForEach-Object {
 
-                $TargetSize   = $_
+                $TargetSize = $_
+                $DestDirectory = Join-Path ([IO.Path]::GetDirectoryName($SVGFileInput)) "Conversion $TargetSize"
 
-                # $ScaleRatio   = $TargetSize / [Math]::Max($SourceWidth, $SourceHeight)
-                # $TargetWidth  = [Math]::Round($SourceWidth * $ScaleRatio)
-                # $TargetHeight = [Math]::Round($SourceHeight * $ScaleRatio)
-
-                $FinalName = $TheSVGBaseName + "-" + $TargetSize + '.png'
-                $TempFinalName = Join-Path $TempDirName $FinalName
-
-                $SVGDir = [IO.Path]::GetDirectoryName($TheSVG)
-                $SVGDir = Join-Path $SVGDir "Conversion"
-
-                if(!(Test-Path -LiteralPath $SVGDir -PathType Container)){
-                    [IO.Directory]::CreateDirectory($SVGDir) | Out-Null
+                if(-not(Test-Path -LiteralPath $DestDirectory -PathType Container)){
+                    [IO.Directory]::CreateDirectory($DestDirectory) | Out-Null
                 }
 
-                $DestFinalName = Join-Path $SVGDir $FinalName
+                $FinalPNGOutput = Join-Path $DestDirectory ($SVGFileBase + "-" + $TargetSize + '.png')
 
-                & rsvg-convert -w $TargetSize -h $TargetSize -a -f png $TheSVG -o $TempFinalName | Out-Null
-
-
-
-
-                $DestFile = $DestFinalName
-                $IDX = 2
-                $PadIndexTo = '1'
-                $StaticFilename = Get-FilePathComponent $DestFile -Component FullPathNoExtension
-                $FileExtension  = Get-FilePathComponent $DestFile -Component FileExtension
-                while (Test-Path -LiteralPath $DestFile -PathType Leaf) {
-                    $DestFile = "{0}_{1:d$PadIndexTo}{2}" -f $StaticFilename, $IDX, $FileExtension
-                    $IDX++
+                if(-not($doOverwrite)){
+                    $IDX = 2
+                    $PadIndexTo = '1'
+                    $StaticFilename = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($FinalPNGOutput),
+                                      [System.IO.Path]::GetFileNameWithoutExtension($FinalPNGOutput))
+                    $FileExtension  = [System.IO.Path]::GetExtension($FinalPNGOutput)
+                    while (Test-Path -LiteralPath $FinalPNGOutput -PathType Leaf) {
+                        $FinalPNGOutput = "{0}_{1:d$PadIndexTo}{2}" -f $StaticFilename, $IDX, $FileExtension
+                        $IDX++
+                    }
                 }
 
-                Move-Item -LiteralPath $TempFinalName -Destination $DestFile
+                $Params = '-w', $TargetSize, '-h', $TargetSize, '-a', '-f', 'png', $SVGFileInput, '-o', $FinalPNGOutput
+
+                & $CMD $Params | Out-Null
+
             }
 
         } -ThrottleLimit $MaxThreads

@@ -23,15 +23,15 @@ function Merge-FlattenDirectory {
     )
 
     begin {
-        $List = @()
+        $List = [System.Collections.Generic.List[String]]@()
     }
 
     process {
         foreach ($P in $InputPath) {
-            if     ($P -is [String]) { $List += $P }
-            elseif ($P.Path)         { $List += $P.Path }
-            elseif ($P.FullName)     { $List += $P.FullName }
-            elseif ($P.PSPath)       { $List += $P.PSPath }
+            if     ($P -is [String]) { $List.Add($P) }
+            elseif ($P.Path)         { $List.Add($P.Path) }
+            elseif ($P.FullName)     { $List.Add($P.FullName) }
+            elseif ($P.PSPath)       { $List.Add($P.PSPath) }
             else                     { Write-Warning "$P is an unsupported type." }
         }
     }
@@ -48,7 +48,7 @@ function Merge-FlattenDirectory {
             $DestPath = $DestPath.TrimEnd('\')
             $TempPath = (New-TempDirectory).FullName
 
-            New-Item -ItemType Directory -Force -Path $TempPath
+            New-Item -ItemType Directory -Force -Path $TempPath | Out-Null
 
             $Source = [WildcardPattern]::Escape($SourcePath)
 

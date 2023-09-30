@@ -39,13 +39,10 @@ function Convert-FontWOFFCompress {
             $Flav = $Using:Flavor
             $FlavorString = ($Flav -ne 'BOTH') ? "-f$($Flav.ToLower())" : ''
 
-            & ftcli converter ft2wf $FlavorString --no-overwrite $CurrentFile
+            $CMD = Get-Command "$env:PYVENV\FontTools\Scripts\ftcli.exe"
+            $Params = "converter", "ft2wf", $FlavorString, "--no-overwrite", $CurrentFile
 
-            # $STDERR = $allOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            # $Filename = Split-Path $CurrentFile -Leaf
-            # if($LASTEXITCODE -ne 0){
-            #     Write-Error "Error processing $Filename. Exit code is not 0."
-            # }
+            & $CMD $Params
 
         } -ThrottleLimit $MaxThreads
     }

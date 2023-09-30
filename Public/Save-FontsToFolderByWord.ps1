@@ -37,14 +37,11 @@ function Save-FontsToFolderByWord {
         $List | ForEach-Object -Parallel {
 
             $FontFile = $_
-            $FontFileC = Get-FilePathComponents -Path $FontFile
 
-            $FontFileName      = $FontFileC.FileFullName
-            $FontDirectory     = $FontFileC.ContainingFolder
+            $FontFileName      = [System.IO.Path]::GetFileName($FontFile)
+            $FontDirectory     = [System.IO.Directory]::GetParent($FontFile)
 
             $FontFileVersion = & python $Using:VersionScript $FontFile
-
-            Write-Host "`$Using:NumWords:" $Using:NumWords -ForegroundColor Green
 
             if($Using:NumWords -eq 1){
                 $RegExWord = '^(\w+)\b'
@@ -105,7 +102,7 @@ function Save-FontsToFolderByWord {
             $PathNoFn = "$FontDirectory\$Step6\$NextPathPart $FontFileVersion\"
             if(!(Test-Path -LiteralPath $PathNoFn -PathType Container)){
                 #Write-Host "`$PathNoFn:" $PathNoFn -ForegroundColor Green
-                [IO.Directory]::CreateDirectory($PathNoFn)
+                [IO.Directory]::CreateDirectory($PathNoFn) | Out-Null
                 # New-Item -Path $PathNoFn -ItemType Directory -Force
             }
 

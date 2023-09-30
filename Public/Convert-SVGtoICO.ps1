@@ -66,6 +66,10 @@ function Convert-SVGtoICO {
                 $InputSVG = $_
                 [String]$OutputW = Select-Xml '//*[local-name()="svg"]/@width' -Path $InputSVG | ForEach-Object Node | ForEach-Object '#text'
                 [String]$OutputH = Select-Xml '//*[local-name()="svg"]/@height' -Path $InputSVG | ForEach-Object Node | ForEach-Object '#text'
+
+                if($OutputW -match '^[\d]+px$') { $OutputW = $OutputW.Replace('px','') }
+                if($OutputH -match '^[\d]+px$') { $OutputH = $OutputH.Replace('px','') }
+
                 [int]$FinalW = [math]::Ceiling($OutputW)
                 [int]$FinalH = [math]::Ceiling($OutputH)
 

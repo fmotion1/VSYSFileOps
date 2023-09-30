@@ -31,7 +31,10 @@ function Convert-FontWOFFDecompress {
             $CurrentFile = $_.Replace('`[', '[')
             $CurrentFile = $CurrentFile.Replace('`]', ']')
 
-            & ftcli converter wf2ft --no-overwrite $CurrentFile
+            $CMD = Get-Command "$env:PYVENV\FontTools\Scripts\ftcli.exe"
+            $Params = "converter", "wf2ft", "--no-overwrite", $CurrentFile
+
+            & $CMD $Params
 
         } -ThrottleLimit $MaxThreads
     }

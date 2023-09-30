@@ -33,13 +33,7 @@ function Save-FontsToVersionedFolderMulti {
 
             $InputFolder = $_
             $Files = Get-ChildItem $InputFolder | % {$_.FullName}
-
-            if(!$Using:WFR){
-                Save-FontsToVersionedFolder -Files $Files -MaxThreads 8
-            }else{
-                Save-FontsToVersionedFolder -Files $Files -MaxThreads 8 -WFR
-            }
-
+            Save-FontsToVersionedFolder -Files $Files -MaxThreads 8 -WFR:$WFR
 
         } -ThrottleLimit $MaxThreads
     }

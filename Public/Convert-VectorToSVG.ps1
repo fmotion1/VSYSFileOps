@@ -31,23 +31,15 @@ function Convert-VectorToSVG {
             $InputFile     = $_
             $CurrentAIFile = $InputFile.Replace('`[', '[')
             $CurrentAIFile = $CurrentAIFile.Replace('`]', ']')
+
             $OutputSVGFile = [IO.Path]::ChangeExtension($CurrentAIFile, ".svg")
 
-            $App   = "$env:bin\inkscape-1.3\bin\inkscape.com"
-            $Args1 = $CurrentAIFile, '--export-area-drawing'
-            $Args2 = '--export-plain-svg', '--export-filename', $OutputSVGFile
-            [void] (& $App $Args1 $Args2 2>&1 | Tee-Object -Variable ALLOUTPUT)
+            $CMD = Get-Command "$env:bin\Inkscape\bin\inkscape.com"
+            $Prams = $CurrentAIFile, '--export-area-drawing', '--export-plain-svg',
+                                     '--export-filename', $OutputSVGFile
 
-            $STDERR = $ALLOUTPUT | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            $Filename = Split-Path $CurrentAIFile -Leaf
+            & $CMD $Prams
 
-            if($STDERR.length -gt 0){
-                Write-Error "Error processing $Filename. Errors were encountered:"
-                foreach ($E in $STDERR) {
-                    Write-Error "StdErr: $E"
-                }
-                return
-            }
 
         } -ThrottleLimit $MaxThreads
     }

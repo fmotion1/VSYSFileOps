@@ -98,7 +98,7 @@ function Save-RandomDataToFile {
         $DestFullPath  = [System.IO.Path]::Combine($OutputPath, $DestFilename)
 
         # We need to convert the input filesize from whatever units specified to bytes
-        $IntendedFilesize = (Convert-UnitsOfMemory $Filesize -From $Unit -To 'Bytes')
+        $IntendedFilesize = (Format-FileSizeUnits -Value $Filesize -From $Unit -To Bytes)
 
         # If we are creating a file less than ~2.1474GB, we can use a faster
         # method for writing random data. For some reason this technique is quicker

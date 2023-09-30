@@ -29,18 +29,19 @@ function Convert-FontGlyphsToSVGsFonts2Svg {
         $List | ForEach-Object -Parallel {
 
             $CurrentFile = $_
-            $DestPath = Get-FilePathComponent -Path $CurrentFile -Component FullPathNoExtension
+            $DestPath = [System.IO.Path]::Combine(
+                [System.IO.Path]::GetDirectoryName($CurrentFile),
+                [System.IO.Path]::GetFileNameWithoutExtension($CurrentFile))
+
             $DestPath = "$DestPath Fonts2SVG"
 
             if(!(Test-Path -LiteralPath $DestPath -PathType Container)){
                 New-Item -Path $DestPath -ItemType Directory -Force
             }
 
-            #$Script = $CurrentFile, '-o', $DestPath
-            # & fonts2svg `"$CurrentFile`" -o `"$DestPath`"
-
-            $APP = "C:\Python\miniconda3\envs\FontTools\Scripts\fonts2svg.exe"
-            & $APP $CurrentFile -o $DestPath
+            $APP = Get-Command "$env:PYVENV\FontTools\Scripts\fonts2svg.exe"
+            $Prams = $CurrentFile, "-o", $DestPath
+            & $APP $Prams
 
         } -ThrottleLimit $MaxThreads
     }
