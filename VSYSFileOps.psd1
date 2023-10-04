@@ -107,7 +107,8 @@
                          'Convert-SVGToPNGBySizeInFolder',
                          'Rename-FilesInFolder',
                          'Optimize-SVGWithSVGOInDirectory',
-                         'Save-LicenseToFolder'
+                         'Save-LicenseToFolder',
+                         'Save-FilesToFolderByWord'
 
     PrivateData = @{
         PSData = @{
