@@ -8,6 +8,10 @@ function Save-FontsToFolderByWord {
         [Int32]
         $NumWords = 1,
 
+        [Parameter(Mandatory=$false)]
+        [Switch]
+        $WholeName,
+
         [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
         [Int32]
         $MaxThreads = 16
@@ -22,9 +26,6 @@ function Save-FontsToFolderByWord {
     }
 
     process {
-
-        throw
-
         try {
             foreach ($P in $Files) {
                 if	 ($P -is [String]) { $List.Add($P) }
@@ -51,42 +52,47 @@ function Save-FontsToFolderByWord {
 
                 $FontFileVersion = & python $Using:VersionScript $FontFile
 
-                if($Using:NumWords -eq 1){
-                    $RegExWord = '^(\w+)\b'
-                    $RegExReplace = '$1\$0'
+                $doWholeName = $Using:WholeName
+
+                if(!$doWholeName){
+                    if($Using:NumWords -eq 1){
+                        $RegExWord = '^(\w+)\b'
+                        $RegExReplace = '$1\$0'
+                    }
+    
+                    if($Using:NumWords -eq 2){
+                        $RegExWord = '^(\w+)[\s|\-](\w+)\b'
+                        $RegExReplace = '$1 $2\$0'
+                    }
+    
+                    if($Using:NumWords -eq 3){
+                        $RegExWord = '^(\w+)[\s|\-](\w+)[\s|\-](\w+)\b'
+                        $RegExReplace = '$1 $2 $3\$0'
+                    }
+
+                    # Insert the first word occuring in the filename
+                    # as a prefixed subdirectory
+                    $Step1 = $FontFileName
+                    $Step2 = $Step1 -replace $RegExWord, $RegExReplace
+
+                    # Remove everything after the first '\' Leaving
+                    # Just the first word.
+                    $parts = $Step2 -split '\\'
+                    $Step3 = $parts[0]
+
+                    # Whitespace Cleanup
+                    $Step4 = $Step3 -replace '\s+', ' '
+                    $Step4 = $Step4.Trim()
+
+                    # Camel Case Conversion
+                    $Step5 = $Step4 -csplit '(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])', -join ' '
+                    Write-Host "`$Step5:" $Step5 -ForegroundColor Green
+
+                    # Edge Case, Rename "Screen Smart" fonts correctly.
+                    $Step6 = $Step5 -replace ' S Sm', ' SSm'
+                } else {
+                    $Step6 = [System.IO.Path]::GetFileNameWithoutExtension($FontFile)
                 }
-
-                if($Using:NumWords -eq 2){
-                    $RegExWord = '^(\w+)[\s|\-](\w+)\b'
-                    $RegExReplace = '$1 $2\$0'
-                }
-
-                if($Using:NumWords -eq 3){
-                    $RegExWord = '^(\w+)[\s|\-](\w+)[\s|\-](\w+)\b'
-                    $RegExReplace = '$1 $2 $3\$0'
-                }
-
-
-                # Insert the first word occuring in the filename
-                # as a prefixed subdirectory
-                $Step1 = $FontFileName
-                $Step2 = $Step1 -replace $RegExWord, $RegExReplace
-
-                # Remove everything after the first '\' Leaving
-                # Just the first word.
-                $parts = $Step2 -split '\\'
-                $Step3 = $parts[0]
-
-                # Whitespace Cleanup
-                $Step4 = $Step3 -replace '\s+', ' '
-                $Step4 = $Step4.Trim()
-
-                # Camel Case Conversion
-                $Step5 = $Step4 -csplit '(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])', -join ' '
-                Write-Host "`$Step5:" $Step5 -ForegroundColor Green
-
-                # Edge Case, Rename "Screen Smart" fonts correctly.
-                $Step6 = $Step5 -replace ' S Sm', ' SSm'
 
                 $FontExt = [IO.Path]::GetExtension($FontFile)
                 if($FontExt -eq '.ttf'){

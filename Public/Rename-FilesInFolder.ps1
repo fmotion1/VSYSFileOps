@@ -12,10 +12,11 @@ function Rename-FilesInFolder {
     $Folders | ForEach-Object {
 
         $Folder = $_
-
         $TempDirectory = New-TempDirectory -Length 16
-        $Files = (Get-ChildItem -LiteralPath $Folder -Recurse).FullName
-
+        [array]$Files = (Get-ChildItem -LiteralPath $Folder -Recurse).FullName
+        Write-Host "`$Files.GetType():" $Files.GetType() -ForegroundColor Green
+        Write-Host "`$Files.GetType().Name:" $Files.GetType().Name -ForegroundColor Green
+        Write-Host "`$Files.GetType().BaseType:" $Files.GetType().BaseType -ForegroundColor Green
         [int]$FileCounter = 0
         [int]$AbsoluteFileCounter = 1
         [int]$TextFileCounter = 1
@@ -31,14 +32,19 @@ function Rename-FilesInFolder {
                 $FileListsArr += $TextFilePath
                 $TextFilePath = Join-Path $TempDirectory ("FileList" + $TextFileCounter + ".txt")
             }
-
+            
             $File | Out-File -Append -FilePath $TextFilePath
-
-            $AbsoluteFileCounter++
             $FileCounter++
+
+            Write-Host "`$File:" $File -ForegroundColor Green
+            Write-Host "`$Files.Count:" $Files.Count -ForegroundColor Green
+            Write-Host "`$AbsoluteFileCounter:" $AbsoluteFileCounter -ForegroundColor Green
+
             if($AbsoluteFileCounter -eq $Files.Count){
                 $FileListsArr += $TextFilePath
             }
+
+            $AbsoluteFileCounter++
         }
 
         $CMD = Get-Command "C:\Program Files (x86)\ReNamer\ReNamer.exe"

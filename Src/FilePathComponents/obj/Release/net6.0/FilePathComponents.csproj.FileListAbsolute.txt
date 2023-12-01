@@ -1,0 +1,12 @@
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\bin\Release\net6.0\FilePathComponents.deps.json
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\bin\Release\net6.0\FilePathComponents.dll
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\bin\Release\net6.0\FilePathComponents.pdb
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\FilePathComponents.csproj.AssemblyReference.cache
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\FilePathComponents.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\FilePathComponents.AssemblyInfoInputs.cache
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\FilePathComponents.AssemblyInfo.cs
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\FilePathComponents.csproj.CoreCompileInputs.cache
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\FilePathComponents.dll
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\refint\FilePathComponents.dll
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\FilePathComponents.pdb
+D:\Dev\Powershell\VSYSModules\VSYSFileOps\Src\FilePathComponents\obj\Release\net6.0\ref\FilePathComponents.dll

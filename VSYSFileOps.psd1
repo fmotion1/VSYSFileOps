@@ -23,14 +23,14 @@
     # PowerShellHostName = ''
 
     RequiredModules =    'VSYSUtility', 
-                         'VSYSGUIOps', 
-                         'BurntToast'
+                         'VSYSGUIOps'
 
     RequiredAssemblies = 'System.Drawing', 
                          'System.Windows.Forms', 
                          'PresentationCore', 
                          'PresentationFramework', 
-                         'System.Web'
+                         'System.Web',
+                         "$PSScriptRoot\Lib\FilePathComponents.dll"
 
     FunctionsToExport =  'Convert-ImageToMetadataExiv2',
                          'Convert-OBJ2VOX',
@@ -48,10 +48,8 @@
                          'Get-DefaultBrowser',
                          'Get-FilePathComponent',
                          'Get-FilePathComponents',
-                         'Get-SpecialFolderPath',
                          'Get-SVGsFromFile',
                          'Get-SVGsFromFileBase64',
-                         'Get-TopMostExplorerWindow',
                          'Get-UniqueColorsInSVG',
                          'Group-ImageByColor',
                          'Group-ImagesBySingleColor',
@@ -66,8 +64,7 @@
                          'Optimize-SVGWithSVGCleaner',
                          'Optimize-SVGWithSVGO',
                          'Register-DLLorOCX',
-                         'Rename-FontToActualName',
-                         'Rename-FontToActualNameDirectory',
+                         'Rename-FontsToActualName',
                          'Rename-RandomizeFilenames',
                          'Request-AdminRights',
                          'Request-ExplorerRefresh',
@@ -96,10 +93,6 @@
                          'Save-FontsToVersionedFolder',
                          'Save-FontsToVersionedFolderMulti',
                          'Rename-SeparatePascalCase',
-                         'Publish-ImageToImgur',
-                         'Publish-ImageToGoogleReverseImageSearch',
-                         'Get-ImageDominantColors',
-                         'Get-ImageDominantSingleColor',
                          'Remove-InvalidFilenameCharacters',
                          'Convert-ResizeRasterImage',
                          'Convert-SVGCrop',
@@ -107,8 +100,8 @@
                          'Convert-SVGToPNGBySizeInFolder',
                          'Rename-FilesInFolder',
                          'Optimize-SVGWithSVGOInDirectory',
-                         'Save-LicenseToFolder',
-                         'Save-FilesToFolderByWord'
+                         'Save-FilesToFolderByWord',
+                         'Test-IsFileLocked'
 
     PrivateData = @{
         PSData = @{

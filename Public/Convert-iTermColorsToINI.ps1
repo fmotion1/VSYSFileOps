@@ -65,9 +65,9 @@ function Convert-iTermColorsToINI {
                     "Ansi 14 Color"       = "brightCyan"
                     "Ansi 15 Color"       = "brightWhite"
                     "Cursor Color"        = "cursorColor"
-                    "Cursor Text Color"   = "!cursorTextColor" # I made this up. Ignore it.
-                    "Bold Color"          = "!boldColor" # I made this up. Ignore it.
-                    "Selected Text Color" = "!selectionForeground" # I made this up. Ignore it.
+                    # "Cursor Text Color"   = "!cursorTextColor" # I made this up. Ignore it.
+                    # "Bold Color"          = "!boldColor" # I made this up. Ignore it.
+                    # "Selected Text Color" = "!selectionForeground" # I made this up. Ignore it.
                     "Selection Color"     = "selectionBackground"
                     "Background Color"    = "background"
                     "Foreground Color"    = "foreground"
@@ -75,12 +75,15 @@ function Convert-iTermColorsToINI {
                 $colorMappings.$iTermColor
             }
 
+            Write-Host "`$winColorNamesArray:" $winColorNamesArray -ForegroundColor Green
+
             for ($i = 0; $i -lt $winColorNamesArray.Length; $i++) {
                 if ($winColorNamesArray[$i] -notmatch "^!") {
-                    #$finalOutput[$winColorNamesArray["$i"]] = $hexColorsArray[$i]
                     $finalOutput[$winColorNamesArray[$i]] = $hexColorsArray[$i]
                 }
             }
+
+            $finalOutput['name'] = [System.IO.Path]::GetFileNameWithoutExtension($_).Trim()
 
             $JSONOut = $finalOutput | ConvertTo-Json
 

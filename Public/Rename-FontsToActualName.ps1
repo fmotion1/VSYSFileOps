@@ -1,4 +1,4 @@
-function Rename-FontToActualName {
+function Rename-FontsToActualName {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]

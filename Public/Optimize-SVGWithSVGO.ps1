@@ -4,6 +4,10 @@ function Optimize-SVGWithSVGO {
         [Parameter(Mandatory, Position = 0, ValueFromPipeline)]
         $Files,
 
+        [Parameter(Mandatory=$false)]
+        [Switch]
+        $ForceRemoveComments,
+
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName)]
         [Int32]
         $MaxThreads = 24
@@ -11,6 +15,7 @@ function Optimize-SVGWithSVGO {
 
     begin {
         $List = [System.Collections.Generic.List[String]]@()
+        & nvm use 20.8
     }
 
     process {
@@ -28,8 +33,28 @@ function Optimize-SVGWithSVGO {
         $List | ForEach-Object -Parallel {
 
             $CurrentFile = $_
-            $CMD = Get-Command svgo-win.exe
-            $Params = $CurrentFile
+
+            [VSYSStructs.FilePathComponents]$Components = Get-FilePathComponents -Path $CurrentFile
+            $ActiveFolder = $Components.Folder
+            $SVGOConfigFile = Join-Path -Path $ActiveFolder -ChildPath 'svgo.config.js'
+
+            if(Test-Path -LiteralPath $SVGOConfigFile -PathType Leaf){
+                $Params = '--config=svgo.config.js', $CurrentFile
+            }else{
+                if($Using:ForceRemoveComments){
+                    $Splat = @{
+                        LiteralPath = "D:\Dev\00 Templates\svgo.config\removeCommentsForce\svgo.config.js"
+                        Destination = $Components.Folder
+                        Force = $true
+                    }
+                    Copy-Item @Splat | Out-Null
+                    $Params = '--config=svgo.config.js', $CurrentFile
+                }else{
+                    $Params = $CurrentFile
+                }
+            }
+
+            $CMD = Get-Command svgo.cmd
             & $CMD $Params
 
         } -ThrottleLimit $MaxThreads
