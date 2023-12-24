@@ -42,7 +42,6 @@
                          'Convert-SVGToPNGBySize',
                          'Convert-VectorToRaster',
                          'Convert-VectorToSVG',
-                         'Convert-WavpackToWav',
                          'Copy-DirectoryStructureToNewFolder',
                          'Copy-PathToClipboard',
                          'Get-DefaultBrowser',
@@ -101,7 +100,9 @@
                          'Rename-FilesInFolder',
                          'Optimize-SVGWithSVGOInDirectory',
                          'Save-FilesToFolderByWord',
-                         'Test-IsFileLocked'
+                         'Test-IsFileLocked',
+                         'Save-FolderToSubfolderByWord',
+                         'Group-FontsByWidth'
 
     PrivateData = @{
         PSData = @{

@@ -65,8 +65,18 @@ function Copy-PathToClipboard {
 
         [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
         [Switch]
-        $NoExtension
+        $NoExtension,
+
+        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
+        [Switch] $AsArray
     )
+
+    begin {
+        if($AsArray -and $NoQuotes){
+            throw "AsArray and NoQuotes cannot be used together."
+        }
+    }
+
     process {
 
         $FilenameList   = [System.Collections.ArrayList]@()
@@ -75,18 +85,11 @@ function Copy-PathToClipboard {
 
         if(!$FilenamesOnly){
             foreach ($P in $Path) {
-                if(Test-Path -LiteralPath $P -PathType Container){
-                    if(!$NoQuotes){
-                        $FoldernameList.Add("`"$P`"")
-                    }else{
-                        $FoldernameList.Add($P)
-                    }
-                }else{
-                    if(!$NoQuotes){
-                        $FilenameList.Add("`"$P`"")
-                    }else{
-                        $FilenameList.Add($P)
-                    }
+                $formattedPath = ($NoQuotes) ? $P : "`"$P`""
+                if (Test-Path -LiteralPath $P -PathType Container) {
+                    $FoldernameList.Add($formattedPath)
+                } else {
+                    $FilenameList.Add($formattedPath)
                 }
             }
         }else{

@@ -79,16 +79,8 @@
 function Save-RandomDataToFiles {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
-        [ValidateScript({
-            if (!(Test-Path -LiteralPath $_)) {
-                throw [System.ArgumentException] "File or Folder does not exist."
-            }
-            if (Test-Path -LiteralPath $_ -PathType Leaf) {
-                throw [System.ArgumentException] "File passed when a folder was expected."
-            }
-            return $true
-        })]
+        [Parameter(Mandatory,ValueFromPipeline)]
+        [string]
         $OutputPath,
 
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]

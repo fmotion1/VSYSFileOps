@@ -1,73 +1,7 @@
-<#
-.SYNOPSIS
-    Writes random data to a file.
-
-.DESCRIPTION
-    Writes random data to a file in the format specified.
-
-.PARAMETER OutputPath
-    The directory where the file will be created.
-
-.PARAMETER Filesize
-    The target filesize of the created file.
-
-.PARAMETER Unit
-    Specifies what unit of memory is being referred to by Filesize.
-    For instance, if Filesize is 10 and Unit is 'MB', this will
-    create a file that is exactly 10MB. Allowed values are:
-    'Bytes','KB','MB','GB', or 'TB'
-
-.PARAMETER FileExtension
-    Specifies the file extension of the created file.
-
-.PARAMETER FilenameLength
-    Specifies the length of the filename for the created file (Excluding the extension).
-
-.EXAMPLE
-    Save-RandomDataToFile -OutputPath 'C:\Users\Username\Desktop\Random' -Filesize 50 -Unit 'MB'
-    > This will create a random file exactly 50MB in 'C:\Users\Username\Desktop\Random'
-
-.EXAMPLE
-    Save-RandomDataToFile -OutputPath 'C:\Dev\Tools\Random' -Filesize 1 -Unit 'GB' -FileExtension 'exe' -FilenameLength 4
-    > This will create a random file exactly 1GB in 'C:\Dev\Tools\Random' with a file extension of .exe, and a filename length of 4.
-
-.INPUTS
-    System.String   (OutputPath, Unit, FileExtension)
-    Decimal         (Filesize)
-    System.String   (OutputPath)
-    Int16           (FilenameLength)
-
-.OUTPUTS
-    Nothing.
-
-.NOTES
-    Name: Save-RandomDataToFile
-    Author: Visusys
-    Release: 1.0.0
-    License: MIT License
-    DateCreated: 2021-12-02
-
-.LINK
-    https://github.com/visusys
-
-.LINK
-    Save-RandomDataToFiles
-
-#>
 function Save-RandomDataToFile {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory,Position=0,ValueFromPipeline)]
-        [ValidateScript({
-            if (!(Test-Path -LiteralPath $_)) {
-                Write-Host "`$_:" $_ -ForegroundColor Green
-                throw [System.ArgumentException] "File or Folder does not exist."
-            }
-            if (Test-Path -LiteralPath $_ -PathType Leaf) {
-                throw [System.ArgumentException] "File passed when a folder was expected."
-            }
-            return $true
-        })]
+        [Parameter(Mandatory,ValueFromPipeline)]
         [String]
         $OutputPath,
 
@@ -94,8 +28,12 @@ function Save-RandomDataToFile {
         # Gather parameters and rope them into useable values
         # Extension / Filename / Full Path
         $DestExtension = $FileExtension
-        $DestFilename  = (Get-RandomAlphanumericString -Length $FilenameLength) + '.' + $DestExtension
-        $DestFullPath  = [System.IO.Path]::Combine($OutputPath, $DestFilename)
+        
+        $RandomString = $(Get-RandomAlphanumericString -Length $FilenameLength) + '.' + $DestExtension
+        $DestFullPath  = Join-Path $OutputPath $RandomString
+
+
+        Write-Host "`$DestFullPath:" $DestFullPath -ForegroundColor Green
 
         # We need to convert the input filesize from whatever units specified to bytes
         $IntendedFilesize = (Format-FileSizeUnits -Value $Filesize -From $Unit -To Bytes)
@@ -141,8 +79,8 @@ function Save-RandomDataToFile {
             $NewFullName = [System.IO.Path]::Combine($OutputPath, $TempFile.Name)
             Rename-Item -Path $NewFullName -NewName $DestFilename
         }
-    }
-}
+     }
+ }
 
 # $Stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
@@ -169,3 +107,5 @@ $Rando | Save-RandomDataToFile
 # Write-Host "`$Stopwatch.Elapsed:            " $Stopwatch.Elapsed -ForegroundColor Green
 # Write-Host "`$Stopwatch.ElapsedMilliseconds:" $Stopwatch.ElapsedMilliseconds -ForegroundColor Green
 # Write-Host "`$Stopwatch.ElapsedTicks:       " $Stopwatch.ElapsedTicks -ForegroundColor Green
+
+#Save-RandomDataToFile
