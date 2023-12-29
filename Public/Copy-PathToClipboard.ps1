@@ -67,10 +67,15 @@ function Copy-PathToClipboard {
     $files = @()
     $folders = @()
 
+
+
     foreach ($item in $Path) {
-        if (Test-Path $item -PathType Leaf) {
+
+        Write-Host "`$Path:" $Path -ForegroundColor Green
+
+        if (Test-Path -LiteralPath $item -PathType Leaf) {
             $files += $item
-        } elseif (Test-Path $item -PathType Container) {
+        } elseif (Test-Path -LiteralPath $item -PathType Container) {
             $folders += $item
         }
     }
