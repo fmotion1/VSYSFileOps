@@ -5,16 +5,9 @@ function Convert-SVGToPNGBySize {
         $Files,
 
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]
-        [String[]]
-        $Sizes,
+        [String[]] $Sizes,
 
-        [Parameter(Mandatory=$false)]
-        [Switch]
-        $OverwriteFiles,
-
-        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
-        [Int32]
-        $MaxThreads = 16
+        [Int32] $MaxThreads = 16
     )
 
     begin {
@@ -39,14 +32,13 @@ function Convert-SVGToPNGBySize {
 
     end {
 
+        $CMD = Get-Command "$env:bin\rsvg-convert.exe"
+
         $List | ForEach-Object -Parallel {
 
             $SVGFileInput = $_
             $SVGFileBase  = [IO.Path]::GetFileNameWithoutExtension($_)
             $TargetSizes  = $Using:Sizes
-            $doOverwrite  = $Using:OverwriteFiles
-
-            $CMD = Get-Command "$env:bin\rsvg-convert.exe"
 
             $TargetSizes | ForEach-Object {
 
@@ -59,22 +51,7 @@ function Convert-SVGToPNGBySize {
 
                 $FinalPNGOutput = Join-Path $DestDirectory ($SVGFileBase + "-" + $TargetSize + '.png')
 
-                if(-not($doOverwrite)){
-                    $IDX = 2
-                    $PadIndexTo = '1'
-                    $StaticFilename = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($FinalPNGOutput),
-                                      [System.IO.Path]::GetFileNameWithoutExtension($FinalPNGOutput))
-                    $FileExtension  = [System.IO.Path]::GetExtension($FinalPNGOutput)
-                    while (Test-Path -LiteralPath $FinalPNGOutput -PathType Leaf) {
-                        $FinalPNGOutput = "{0}_{1:d$PadIndexTo}{2}" -f $StaticFilename, $IDX, $FileExtension
-                        $IDX++
-                    }
-                }
-
-                $Params = '-w', $TargetSize, '-h', $TargetSize, '-a', '-f', 'png', $SVGFileInput, '-o', $FinalPNGOutput
-
-                & $CMD $Params | Out-Null
-
+                & $Using:CMD -w $TargetSize -h $TargetSize -a -f png $SVGFileInput -o $FinalPNGOutput | Out-Null
             }
 
         } -ThrottleLimit $MaxThreads

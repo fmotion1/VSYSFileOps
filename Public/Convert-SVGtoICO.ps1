@@ -4,13 +4,8 @@ function Convert-SVGtoICO {
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         $Files,
 
-        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
-        [Switch]
-        $HonorSub16pxSizes,
-
-        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
-        [Int32]
-        $MaxThreads = 16
+        [Switch] $HonorSub16pxSizes,
+        [Int32] $MaxThreads = 16
     )
 
     begin {
@@ -29,123 +24,72 @@ function Convert-SVGtoICO {
 
     end {
 
+        $TempDirList = [System.Collections.Generic.List[String]]@()
+
         $List | ForEach-Object -Parallel {
 
-            $TempDir = New-TempDirectory
+            $TempDir = New-TempDirectory -Length 15
             $TempDirName = $TempDir.FullName
+            $TempDirList.Add($TempDirName)
 
             $InputSVG = $_
-            $SVGW = 0
-            $SVGH = 0
-            $Undetermined = $false
-            $ViewBoxMatch = $false
-            $WidthHeightMatch = $false
+            function Get-SVGDimension($attribute) {
+                $dimension = Select-Xml "//*[local-name()='svg']/@$attribute" -Path $InputSVG | % Node | % '#text'
+                if ($dimension -match '^[\d]+px$') { $dimension = $dimension.Replace('px','') }
+                return [math]::Ceiling($dimension)
+            }
 
-            [String]$Output = Select-Xml '//*[local-name()="svg"]/@viewBox' -Path $InputSVG | % Node | % '#text'
-
-            if ($Output) {
-                $SourceWidth = [single]($Output.Split(" "))[2]
-                $SourceHeight = [single]($Output.Split(" "))[3]
-                [int]$FinalWidth = [math]::Ceiling($SourceWidth)
-                [int]$FinalHeight = [math]::Ceiling($SourceHeight)
-
-                if ( ($FinalWidth -ne 0) -and ($FinalHeight -ne 0) ) {
-                    $Undetermined = $false
-                    $ViewBoxMatch = $true
-                    $SVGW = $FinalWidth
-                    $SVGH = $FinalHeight
-
-                } else {
-                    $ViewBoxMatch = $false
-                }
+            $ViewBoxOutput = Select-Xml '//*[local-name()="svg"]/@viewBox' -Path $InputSVG | % Node | % '#text'
+            if ($ViewBoxOutput) {
+                $SourceWidth = [single]($ViewBoxOutput.Split(" "))[2]
+                $SourceHeight = [single]($ViewBoxOutput.Split(" "))[3]
+                $SVGW = [math]::Ceiling($SourceWidth)
+                $SVGH = [math]::Ceiling($SourceHeight)
             } else {
-                $ViewBoxMatch = $false
+                $SVGW = Get-SVGDimension 'width'
+                $SVGH = Get-SVGDimension 'height'
             }
 
-            if (!$ViewBoxMatch) {
-                $InputSVG = $_
-                [String]$OutputW = Select-Xml '//*[local-name()="svg"]/@width' -Path $InputSVG | ForEach-Object Node | ForEach-Object '#text'
-                [String]$OutputH = Select-Xml '//*[local-name()="svg"]/@height' -Path $InputSVG | ForEach-Object Node | ForEach-Object '#text'
-
-                if($OutputW -match '^[\d]+px$') { $OutputW = $OutputW.Replace('px','') }
-                if($OutputH -match '^[\d]+px$') { $OutputH = $OutputH.Replace('px','') }
-
-                [int]$FinalW = [math]::Ceiling($OutputW)
-                [int]$FinalH = [math]::Ceiling($OutputH)
-
-                if ( ($FinalW -ne 0) -and ($FinalH -ne 0) ) {
-                    $Undetermined = $false
-                    $WidthHeightMatch = $true
-                    $SVGW = $FinalW
-                    $SVGH = $FinalH
-                } else {
-                    $WidthHeightMatch = $false
-                    $Undetermined = $true
+            $sizes = 16, 20, 24, 32, 48, 256
+            foreach ($size in $sizes) {
+                $outputSize = if ($size -eq 16 -and $SVGW -lt 16 -and $SVGH -lt 16 -and $Using:HonorSub16pxSizes) { 
+                    [math]::Max($SVGW, $SVGH)
+                } else { 
+                    $size
                 }
+                rsvg-convert -w $outputSize -h $outputSize -a -f png $InputSVG -o "$TempDirName\$size.png" | Out-Null
+                magick "$TempDirName\$size.png" -background none -gravity center -extent ${size}x${size} png32:"$TempDirName\$size.png" | Out-Null
             }
 
-
-            $NewSize = 16
-
-            if(($SVGW -gt 0) -and ($SVGH -gt 0)){
-                if($Using:HonorSub16pxSizes){
-                    if(($SVGW -lt 16) -and ($SVGH -lt 16)){
-                        if($SVGW -gt $SVGH){
-                            $NewSize = $SVGW
-                        }else{
-                            $NewSize = $SVGH
-                        }
-                    }
-                }
-            }
-
-            rsvg-convert -w $NewSize -h $NewSize -a -f png $InputSVG -o $TempDirName\16.png
-            rsvg-convert -w 20 -h 20 -a -f png $InputSVG -o $TempDirName\20.png
-            rsvg-convert -w 24 -h 24 -a -f png $InputSVG -o $TempDirName\24.png
-            rsvg-convert -w 32 -h 32 -a -f png $InputSVG -o $TempDirName\32.png
-            rsvg-convert -w 48 -h 48 -a -f png $InputSVG -o $TempDirName\48.png
-            rsvg-convert -w 256 -h 256 -a -f png $InputSVG -o $TempDirName\256.png
-
-            magick convert $TempDirName\16.png -background none -gravity center -extent 16x16 png32:$TempDirName\16.png
-            magick convert $TempDirName\20.png -background none -gravity center -extent 20x20 png32:$TempDirName\20.png
-            magick convert $TempDirName\24.png -background none -gravity center -extent 24x24 png32:$TempDirName\24.png
-            magick convert $TempDirName\32.png -background none -gravity center -extent 32x32 png32:$TempDirName\32.png
-            magick convert $TempDirName\48.png -background none -gravity center -extent 48x48 png32:$TempDirName\48.png
-            magick convert $TempDirName\256.png -background none -gravity center -extent 256x256 png32:$TempDirName\256.png
-
-            $IconTempName = Get-RandomAlphanumericString -Length 13
-
-            magick convert $TempDirName\16.png $TempDirName\20.png $TempDirName\24.png $TempDirName\32.png $TempDirName\48.png $TempDirName\256.png $TempDirName\$IconTempName.ico
+            $IconTempName = Get-RandomAlphanumericString -Length 15
+            magick $($sizes.ForEach{"$TempDirName\$_.png"}) "$TempDirName\$IconTempName.ico" | Out-Null
+            
 
             $DestFile = [System.IO.Path]::GetFileNameWithoutExtension($InputSVG) + ".ico"
-            #$DestPath = Get-FilePathComponent -Path $InputSVG -Component Folder
-            $DestPathBase = [System.IO.Path]::GetDirectoryName($InputSVG)
-            $DestPath = Join-Path $DestPathBase "ICO Conversion"
-
-            if(!(Test-Path -Path $DestPath -PathType Container)){
+            $DestPath = Join-Path -Path ([System.IO.Path]::GetDirectoryName($InputSVG)) -ChildPath "ICO Conversion"
+            if (!(Test-Path -Path $DestPath -PathType Container)) {
                 New-Item -Path $DestPath -ItemType Directory -Force | Out-Null
             }
 
-            $TempFilePath = [IO.Path]::Combine($TempDirName, "$IconTempName.ico")
-            $DestFilePath = [IO.Path]::Combine($DestPath, $DestFile)
+            $TempFilePath = [System.IO.Path]::Combine($TempDirName, "$IconTempName.ico")
+            $DestFilePath = [System.IO.Path]::Combine($DestPath, $DestFile)
 
             $IDX = 2
-            $PadIndexTo = '1'
-            $StaticFilename = Get-FilePathComponent $DestFilePath -Component FullPathNoExtension
-            $FileExtension  = Get-FilePathComponent $DestFilePath -Component FileExtension
+            $StaticFilename = $DestFilePath.Substring(0, $DestFilePath.LastIndexOf('.'))
+            $FileExtension  = [System.IO.Path]::GetExtension($DestFilePath)
             while (Test-Path -LiteralPath $DestFilePath -PathType Leaf) {
-                $DestFilePath = "{0}_{1:d$PadIndexTo}{2}" -f $StaticFilename, $IDX, $FileExtension
+                $DestFilePath = "{0}_{1:d1}{2}" -f $StaticFilename, $IDX, $FileExtension
                 $IDX++
             }
 
             if (Test-Path -LiteralPath $TempFilePath -PathType leaf) {
-                [IO.File]::Move($TempFilePath, $DestFilePath)
+                [IO.File]::Move($TempFilePath, $DestFilePath) | Out-Null
             }
 
-            # Write-Host "`$TempDirName:" $TempDirName -ForegroundColor Green
-
-            Remove-Item -LiteralPath $TempDirName -Force -Recurse
-
         } -ThrottleLimit $MaxThreads
+
+        foreach ($Dir in $TempDirList) {
+            Remove-Item -LiteralPath $Dir -Recurse
+        }
     }
 }

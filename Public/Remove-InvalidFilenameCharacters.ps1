@@ -1,14 +1,14 @@
 Function Remove-InvalidFilenameCharacters {
     param(
-        [Alias("f")]
-        [Parameter( Mandatory,Position=0,
-                    ValueFromPipeline,
-                    ValueFromPipelineByPropertyName)]
-        [String]
-        $Filename
+      [Parameter(Mandatory=$true,
+        Position=0,
+        ValueFromPipeline=$true,
+        ValueFromPipelineByPropertyName=$true)]
+      [String]$Name
     )
-
+  
     $invalidChars = [IO.Path]::GetInvalidFileNameChars() -join ''
     $re = "[{0}]" -f [RegEx]::Escape($invalidChars)
-    return ($Filename -replace $re)
+    return ($Name -replace $re)
 }
+

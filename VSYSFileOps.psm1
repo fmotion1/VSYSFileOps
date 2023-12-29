@@ -11,6 +11,7 @@ Foreach ($import in @('private', 'public')) {
             [System.Management.Automation.ErrorCategory]::SyntaxError,
             $import
         )
+        $_.FullName
         throw $eRecord
     }
 }

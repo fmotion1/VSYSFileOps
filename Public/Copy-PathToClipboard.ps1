@@ -48,113 +48,98 @@
     https://github.com/visusys
 
 #>
+
 function Copy-PathToClipboard {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory, ValueFromPipeline,ValueFromPipelineByPropertyName,Position = 0)]
-        [String[]]
-        $Path,
-
-        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
-        [Switch]
-        $FilenamesOnly,
-
-        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
-        [Switch]
-        $NoQuotes,
-
-        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
-        [Switch]
-        $NoExtension,
-
-        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
-        [Switch] $AsArray
+    param(
+        [string[]]$Path,
+        [switch]$FilenamesOnly,
+        [switch]$NoQuotes,
+        [switch]$NoExtension,
+        [switch]$AsArray
     )
 
-    begin {
-        if($AsArray -and $NoQuotes){
-            throw "AsArray and NoQuotes cannot be used together."
+    # Check for incompatible switch combination
+    if ($AsArray -and $NoQuotes) {
+        throw "The AsArray and NoQuotes switches cannot be used together."
+    }
+
+    # Separate files and folders for individual processing
+    $files = @()
+    $folders = @()
+
+    foreach ($item in $Path) {
+        if (Test-Path $item -PathType Leaf) {
+            $files += $item
+        } elseif (Test-Path $item -PathType Container) {
+            $folders += $item
         }
     }
 
-    process {
+    # Define a helper function to process paths
+    function Process-Path {
+        param(
+            [string]$Path,
+            [bool]$IsFile
+        )
 
-        $FilenameList   = [System.Collections.ArrayList]@()
-        $FoldernameList = [System.Collections.ArrayList]@()
-        $CombinedList   = [System.Collections.ArrayList]@()
+        $fileName = [System.IO.Path]::GetFileName($Path)
+        $extension = [System.IO.Path]::GetExtension($Path)
+        $directory = [System.IO.Path]::GetDirectoryName($Path)
 
-        if(!$FilenamesOnly){
-            foreach ($P in $Path) {
-                $formattedPath = ($NoQuotes) ? $P : "`"$P`""
-                if (Test-Path -LiteralPath $P -PathType Container) {
-                    $FoldernameList.Add($formattedPath)
-                } else {
-                    $FilenameList.Add($formattedPath)
-                }
+        # Extract filename or folder name if required
+        if ($FilenamesOnly) {
+            if ($IsFile -and -not $NoExtension) {
+                # Keep the extension for files when $NoExtension is not set
+                $Path = $fileName
+            } else {
+                # Remove extension if $NoExtension is set or item is a folder
+                $Path = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
             }
-        }else{
-            if(!$NoExtension){
-                foreach ($P in $Path) {
-                    if(Test-Path -LiteralPath $P -PathType Container){
-                        $Name = [System.IO.Path]::GetFileName($P)
-                        if(!$NoQuotes){
-                            $FoldernameList.Add("`"$Name`"")
-                        }else{
-                            $FoldernameList.Add($Name)
-                        }
-                    }else{
-                        $Name = [System.IO.Path]::GetFileName($P)
-                        if(!$NoQuotes){
-                            $FilenameList.Add("`"$Name`"")
-                        }else{
-                            $FilenameList.Add($Name)
-                        }
-                    }
-                }
-            }else{
-                foreach ($P in $Path) {
-                    if(Test-Path -LiteralPath $P -PathType Container){
-                        $Name = [System.IO.Path]::GetFileName($P)
-                        $Name = Get-FilePathComponent -Path $Name -Component FileBase
-                        if(!$NoQuotes){
-                            $FoldernameList.Add("`"$Name`"")
-                        }else{
-                            $FoldernameList.Add($Name)
-                        }
-                    }else{
-                        $Name = [System.IO.Path]::GetFileName($P)
-                        $Name = Get-FilePathComponent -Path $Name -Component FileBase
-                        if(!$NoQuotes){
-                            $FilenameList.Add("`"$Name`"")
-                        }else{
-                            $FilenameList.Add($Name)
-                        }
-                    }
-                }
-            }
-
+        } elseif ($NoExtension -and $IsFile) {
+            # Remove extension from files if required
+            $Path = [System.IO.Path]::Combine($directory, [System.IO.Path]::GetFileNameWithoutExtension($fileName))
         }
 
+        # Add quotes if required and not outputting as an array
+        if (-not $NoQuotes -and -not $AsArray) {
+            $Path = "`"$Path`""
+        }
+
+        return $Path
+    }
+
+    # Process files and folders
+    $processedFiles = $files | ForEach-Object { Process-Path -Path $_ -IsFile $true }
+    $processedFolders = $folders | ForEach-Object { Process-Path -Path $_ -IsFile $false }
+
+    # Sort files and folders numerically
+    $sortedFiles = $processedFiles | Format-SortNumerical
+    $sortedFolders = $processedFolders | Format-SortNumerical
+
+    # Combine sorted folders and files
+    $combinedPaths = $sortedFolders + $sortedFiles
+
+    # Format as a PowerShell array if required
+    if ($AsArray) {
+        $formattedArray = "`$OutputArray = @(`n"
+        foreach ($path in $combinedPaths) {
+            $formattedArray += "    `"$path`",`n"
+        }
+        $formattedArray = $formattedArray.TrimEnd(",`n")  # Remove the last comma
+        $formattedArray += "`n)"
+
+        # Set the formatted array to the clipboard
+        $formattedArray | Set-Clipboard
+    } else {
+        # Clear the clipboard before setting the new content
         [System.Windows.Forms.Clipboard]::Clear()
-        $FoldernameList = $FoldernameList | Format-SortNumerical
-        $FilenameList   = $FilenameList | Format-SortNumerical
 
-        if($FoldernameList.Count -gt 0){
-            if($FoldernameList.Count -eq 1){
-                $CombinedList.Add($FoldernameList)
-            }else{
-                $CombinedList.AddRange($FoldernameList)
-            }
-        }
-
-        if($FilenameList.Count -gt 0){
-            if($FilenameList.Count -eq 1){
-                $CombinedList.Add($FilenameList)
-            }else{
-                $CombinedList.AddRange($FilenameList)
-            }
-        }
-
-        $CombinedList | Set-Clipboard
+        # Copy the combined, processed paths to the clipboard
+        $combinedPaths | Set-Clipboard
     }
 }
+
+
+# Example usage:
+# Copy-PathToClipboard -Path @("C:\path\to\file1.txt", "C:\path\to\folder1") -FilenamesOnly -AsArray
+

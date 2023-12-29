@@ -102,7 +102,9 @@
                          'Save-FilesToFolderByWord',
                          'Test-IsFileLocked',
                          'Save-FolderToSubfolderByWord',
-                         'Group-FontsByWidth'
+                         'Move-FileToSubfolder',
+                         'Move-FileToFolder',
+                         'Rename-FileExtension'
 
     PrivateData = @{
         PSData = @{
