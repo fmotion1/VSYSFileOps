@@ -1,4 +1,4 @@
-function Group-SortSVGsBySizeWidthHeight {
+function Group-SortSVGsByWidthHeightOnly {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory, Position = 0)]

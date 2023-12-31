@@ -15,7 +15,7 @@ function Optimize-SVGWithSVGOInDirectory {
 
     begin {
         $List = [System.Collections.Generic.List[string]]@()
-        & nvm use 20.8
+        & nvm use 21.3.0
     }
 
     process {
