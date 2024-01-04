@@ -24,13 +24,11 @@ function Convert-SVGtoICO {
 
     end {
 
-        $TempDirList = [System.Collections.Generic.List[String]]@()
 
         $List | ForEach-Object -Parallel {
 
             $TempDir = New-TempDirectory -Length 15
             $TempDirName = $TempDir.FullName
-            $TempDirList.Add($TempDirName)
 
             $InputSVG = $_
             function Get-SVGDimension($attribute) {
@@ -86,9 +84,19 @@ function Convert-SVGtoICO {
                 [IO.File]::Move($TempFilePath, $DestFilePath) | Out-Null
             }
 
+            try {
+                # Write-Host "Removing Temp Directory ($TempDirName)." -ForegroundColor White
+                Remove-Item $TempDirName -Recurse -Force
+            }
+            catch {
+                Write-Error "Can't remove temp dir. ($TempDirName)"
+            }
+            
+
         } -ThrottleLimit $MaxThreads
 
         foreach ($Dir in $TempDirList) {
+            Write-Host "Removing temp directory: $Dir" -ForegroundColor White
             Remove-Item -LiteralPath $Dir -Recurse
         }
     }
