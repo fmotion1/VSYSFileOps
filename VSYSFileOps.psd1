@@ -95,7 +95,6 @@
                          'Convert-CropSVGUsingInkscape',
                          'Get-ImageDimensions',
                          'Convert-SVGToPNGBySizeInFolder',
-                         'Rename-FilesInFolder',
                          'Optimize-SVGWithSVGOInDirectory',
                          'Save-FilesToFolderByWord',
                          'Test-IsFileLocked',

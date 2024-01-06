@@ -41,7 +41,10 @@ function Convert-CropSVGUsingInkscape {
                 $AbsolutePath = Resolve-Path -Path $Path
 
                 if (Test-Path -Path $AbsolutePath) {
-                    $List.Add($AbsolutePath)
+                    $reFilter = '\.(svg)$'
+                    if ($AbsolutePath -match $reFilter) {
+                        $List.Add($AbsolutePath)
+                    }
                 } else {
                     Write-Warning "$AbsolutePath does not exist."
                 }
@@ -79,43 +82,32 @@ function Convert-CropSVGUsingInkscape {
                 $DestFile
             }
 
+            $DestFilename = [System.IO.Path]::GetFileName($CurrentSVG)
+            if($RenameOutput) {
+                $DestFilename += '_crop.svg'
+            }
+            $DestFile = $null
 
+            $FileParent = [System.IO.Directory]::GetParent($CurrentSVG)
             if($PlaceInSubfolder){
-
-                $FileParent = [System.IO.Directory]::GetParent($CurrentSVG)
                 $FileNewDir = [System.IO.Path]::Combine($FileParent, "Cropped")
-
                 if(-not(Test-Path -LiteralPath $FileNewDir -PathType Container)){
                     New-Item -Path $FileNewDir -ItemType Directory -Force | Out-Null
                 }
-
-                if($RenameOutput) {
-                    $DestFilename = [System.IO.Path]::GetFileName($CurrentSVG) + '_crop.svg'
-                    $DestFile = Join-Path $FileNewDir -ChildPath $DestFilename
-                    $FinalOutput = Rename-DuplicateSVGs -Dest $DestFile
-
-                } else {
-                    $FinalOutput = Join-Path $FileNewDir -ChildPath $CurrentSVG
-                }
-
+                $DestFile = Join-Path $FileNewDir -ChildPath $DestFilename
             } else {
-
-                if($RenameOutput) {
-                    $CurrentSVGPath = [System.IO.Directory]::GetParent($CurrentSVG)
-                    $DestFilename = [System.IO.Path]::GetFileName($CurrentSVG) + '_crop.svg'
-                    $DestFile = Join-Path $CurrentSVGPath -ChildPath $DestFilename
-
-                    $FinalOutput = Rename-DuplicateSVGs -Dest $DestFile
-
-                } else {
-
-                    $FinalOutput = $CurrentSVG
-                }
+                $DestFile = Join-Path $FileParent -ChildPath $DestFilename
             }
 
+            if($RenameOutput){
+                $FinalOutput = Rename-DuplicateSVGs -Dest $DestFile
+            }else{
+                $FinalOutput = $DestFile
+            }
+            
+            
             $Params = '-o', $FinalOutput, '-D', $CurrentSVG
             & $Using:InkscapeCmd $Params | Out-Null
-
 
         } -ThrottleLimit $MaxThreads
     }
