@@ -1,6 +1,7 @@
 Foreach ($import in @('private', 'public')) {
     Try {
         Get-ChildItem -Path "$PSScriptRoot\$import\*.ps1" | ForEach-Object {
+            #Write-Host "Importing $($_.FullName)"
             . $_.FullName
         }
     } Catch {

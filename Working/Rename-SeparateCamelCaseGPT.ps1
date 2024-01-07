@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Renames files by separating PascalCase or camelCase words with spaces.
 
@@ -58,7 +58,7 @@ function Rename-SeparatePascalCase {
     )
 
     begin {
-        $List = [System.Collections.Generic.List[String]]@()
+        $List = [System.Collections.Generic.List[System.Object]]@()
     }
 
     process {
@@ -69,14 +69,16 @@ function Rename-SeparatePascalCase {
                     elseif ($P.PSPath)       { $P.PSPath }
                     else { Write-Error "$P is an unsupported type."; throw }
 
-            $AbsolutePath = Resolve-Path -Path $Path
+            $AbsolutePath = if ([System.IO.Path]::IsPathRooted($Path)) { $Path } 
+            else { Resolve-Path -Path $Path }
+
 
             if (Test-Path -LiteralPath $AbsolutePath) {
-                if($ProcessFolderContents){
-                    if (Test-Path -LiteralPath $AbsolutePath -PathType Container){
-                        $List.Add($AbsolutePath)
-                    }
-                }else{
+                if($ProcessFolderContents && (Test-Path -LiteralPath $AbsolutePath -PathType Container)){
+                    $TestFiles = (Get-ChildItem -LiteralPath $AbsolutePath -Recurse -File) | % {$_.FullName}
+                    
+                    $List.AddRange($TestFiles)
+                } else {
                     $List.Add($AbsolutePath)
                 }
             } else {
@@ -91,31 +93,6 @@ function Rename-SeparatePascalCase {
 
     end {
    
-        if($ProcessFolderContents) {
-            $FileList = [System.Collections.Generic.List[String]]@()
-            $isEmpty = $true
-            foreach ($Folder in $List) {
-                try {
-                    $FilesItems = Get-ChildItem -LiteralPath $Folder -Recurse -File
-                    if($FilesItems){
-                        $isEmpty = $false
-                        $Files = $FilesItems | ForEach-Object { $_.FullName }
-                        foreach ($File in $Files) {
-                            $FileList.Add($File)
-                        }
-                    }
-                } catch {
-                    Write-Error "Error processing folder $Folder`: $_"
-                }
-            }
-        
-            if($isEmpty){
-                Write-Host -f Red "Error: All folders passed in are empty."
-            }
-
-            $List = $FileList
-        }
-
         $List | ForEach-Object -Parallel {
 
             $File = $_

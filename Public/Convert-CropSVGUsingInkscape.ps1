@@ -3,18 +3,9 @@ function Convert-CropSVGUsingInkscape {
     param (
         [Parameter(Mandatory,Position=0,ValueFromPipeline)]
         $Files,
-
-        [Parameter(Mandatory=$false)]
-        [Switch]
-        $RenameOutput,
-
-        [Parameter(Mandatory=$false)]
-        [Switch]
-        $PlaceInSubfolder,
-
-        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName)]
-        [Int32]
-        $MaxThreads = 16
+        [Switch] $RenameOutput,
+        [Switch] $PlaceInSubfolder,
+        [Int32] $MaxThreads = 16
     )
 
     begin {
@@ -22,37 +13,32 @@ function Convert-CropSVGUsingInkscape {
         $List = [System.Collections.Generic.List[String]]@()
         
         try {
-            $InkscapeCmd = Get-Command inkscape.com
+            $InkscapeCmd = Get-Command inkscape.com -ErrorAction Stop
         }
         catch {
-            throw "Inkscape is not available in your PATH environment variable."
+            Write-Error "Fatal: Inkscape isn't available in PATH."
+            throw $_
         }
     }
 
     process {
-        try {
-            foreach ($P in $Files) {
-                $Path = if ($P -is [String]) { $P }
-                        elseif ($P.Path) { $P.Path }
-                        elseif ($P.FullName) { $P.FullName }
-                        elseif ($P.PSPath) { $P.PSPath }
-                        else { Write-Error "$P is an unsupported type."; throw }
+        foreach ($P in $Files) {
 
-                $AbsolutePath = Resolve-Path -Path $Path
+            $Path = if ($P -is [String])  { $P }
+                    elseif ($P.Path)	  { $P.Path }
+                    elseif ($P.FullName)  { $P.FullName }
+                    elseif ($P.PSPath)	  { $P.PSPath }
+                    else { Write-Error "$P is an unsupported type."; throw }
 
-                if (Test-Path -Path $AbsolutePath) {
-                    $reFilter = '\.(svg)$'
-                    if ($AbsolutePath -match $reFilter) {
-                        $List.Add($AbsolutePath)
-                    }
-                } else {
-                    Write-Warning "$AbsolutePath does not exist."
-                }
+            $AbsolutePath = if ([System.IO.Path]::IsPathRooted($Path)) { $Path } 
+            else { Resolve-Path -Path $Path }
+
+            if (Test-Path -Path $AbsolutePath) {
+                $List.Add($AbsolutePath)
+            } else {
+                Write-Warning "$AbsolutePath does not exist."
             }
-        } catch {
-            Write-Error "Something went wrong parsing -Files. Check your input."
-            $PSCmdlet.ThrowTerminatingError($PSItem)
-        }
+        } 
     }
 
     end {
@@ -83,12 +69,13 @@ function Convert-CropSVGUsingInkscape {
             }
 
             $DestFilename = [System.IO.Path]::GetFileName($CurrentSVG)
+            $FileParent = [System.IO.Directory]::GetParent($CurrentSVG)
+
             if($RenameOutput) {
                 $DestFilename += '_crop.svg'
             }
             $DestFile = $null
 
-            $FileParent = [System.IO.Directory]::GetParent($CurrentSVG)
             if($PlaceInSubfolder){
                 $FileNewDir = [System.IO.Path]::Combine($FileParent, "Cropped")
                 if(-not(Test-Path -LiteralPath $FileNewDir -PathType Container)){
@@ -104,7 +91,6 @@ function Convert-CropSVGUsingInkscape {
             }else{
                 $FinalOutput = $DestFile
             }
-            
             
             $Params = '-o', $FinalOutput, '-D', $CurrentSVG
             & $Using:InkscapeCmd $Params | Out-Null

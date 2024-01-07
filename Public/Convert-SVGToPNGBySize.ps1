@@ -11,6 +11,15 @@ function Convert-SVGToPNGBySize {
     )
 
     begin {
+
+        try {
+            $RSVGConvertCMD = Get-Command rsvg-convert.exe
+        }
+        catch{
+            Write-Error "RSVG-Convert is not available in PATH."
+            throw $_
+        }
+
         $List = [System.Collections.Generic.List[String]]::new()
         $Sizes | ForEach-Object {
             if($_ -notmatch "^\d{1,4}$"){
@@ -22,25 +31,25 @@ function Convert-SVGToPNGBySize {
 
     process {
         foreach ($P in $Files) {
-            if	   ($P -is [String]) { $List.Add($P) }
-            elseif ($P.Path)		 { $List.Add($P.Path) }
-            elseif ($P.FullName)	 { $List.Add($P.FullName) }
-            elseif ($P.PSPath)	     { $List.Add($P.PSPath) }
-            else					 { Write-Warning "$P is an unsupported type." }
+
+            $Path = if ($P -is [String])  { $P }
+                    elseif ($P.Path)	  { $P.Path }
+                    elseif ($P.FullName)  { $P.FullName }
+                    elseif ($P.PSPath)	  { $P.PSPath }
+                    else { Write-Error "$P is an unsupported type."; throw }
+
+            $AbsolutePath = if ([System.IO.Path]::IsPathRooted($Path)) { $Path } 
+            else { Resolve-Path -Path $Path }
+
+            if (Test-Path -Path $AbsolutePath) {
+                $List.Add($AbsolutePath)
+            } else {
+                Write-Warning "$AbsolutePath does not exist."
+            }
         }
     }
 
     end {
-
-        try {
-            $RSVGConvertCMD = Get-Command "$env:bin\rsvg-convert.exe"
-        }
-        catch{
-            throw "rsvg-convert.exe is not in PATH."
-        }
-
-
-        Write-Host "`$Sizes:" $Sizes -ForegroundColor Green
 
         $List | ForEach-Object -Parallel {
 
@@ -53,16 +62,11 @@ function Convert-SVGToPNGBySize {
                 $TargetSize = $_
                 $DestDirectory = Join-Path -Path (Split-Path -Parent $SVGFileInput) -ChildPath "Conversion $TargetSize"
 
-                Write-Host "`$DestDirectory:" $DestDirectory -ForegroundColor Green
-
                 if(-not(Test-Path -LiteralPath $DestDirectory -PathType Container)){
                     [IO.Directory]::CreateDirectory($DestDirectory)
                 }
 
-
-
                 $FinalPNGOutput = Join-Path -Path $DestDirectory -ChildPath ($SVGFileBase + "-" + $TargetSize + '.png')
-                Write-Host "`$FinalPNGOutput:" $FinalPNGOutput -ForegroundColor Green
                 & $Using:RSVGConvertCMD -a -w $TargetSize -h $TargetSize -f png $SVGFileInput -o $FinalPNGOutput | Out-Null
             }
 
